@@ -1,29 +1,38 @@
-/src
-  /app
-    /page.tsx                <-- main entry (renders <Designer />)
-  /components
-    Canvas.tsx
-    SidebarPalette.tsx
-    NodeFormPanel.tsx
-    SimulatorPanel.tsx
-    /nodes
-      StartNode.tsx
-      TaskNode.tsx
-      ApprovalNode.tsx
-      AutomatedNode.tsx
-      EndNode.tsx
-  /hooks
-    useWorkflow.ts
-    useApi.ts
-  /lib
-    simulateEngine.ts
-  /types
-    workflow.ts
-  /styles
-    globals.css
-/src/app/api
-  /automations/route.ts
-  /simulate/route.ts
-package.json
-tailwind.config.js
-tsconfig.json
+// /src
+// /app
+//   /page.tsx                <-- main entry (renders <Designer />)
+// /components
+//   Canvas.tsx
+//   SidebarPalette.tsx
+//   NodeFormPanel.tsx
+//   SimulatorPanel.tsx
+//   /nodes
+//     StartNode.tsx
+//     TaskNode.tsx
+//     ApprovalNode.tsx
+//     AutomatedNode.tsx
+//     EndNode.tsx
+// /common
+//   Input    label,value,onChange, placeholder ,required = false ,type 
+//   KeyValueList items , onChange , label
+//   Card children , className
+//     Checkbox  label, checked,  onChange 
+//     RightDrawer   open,onClose,children,width = "350px",
+//     Select ::   label,  value, onChange, options,required = false
+//     TextArea ::  label,  value, onChange , placeholder , rows
+
+// /hooks
+//   useWorkflow.ts
+//   useApi.ts
+// /lib
+//   simulateEngine.ts
+// /types
+//   workflow.ts
+// /styles
+//   globals.css
+// /src/app/api
+// /automations/route.ts
+// /simulate/route.ts
+// package.json
+// tailwind.config.js
+// tsconfig.json

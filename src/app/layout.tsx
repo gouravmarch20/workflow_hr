@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 
-import "./globals.css";
-
 export const metadata: Metadata = {
-  title: "Fake NextAuth App",
-  description: "Next.js + fake credentials login example",
+  title: "HR Workflow Designer",
+  description: "Visual workflow builder for HR processes",
 };
 
 export default function RootLayout({

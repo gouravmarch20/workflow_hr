@@ -1,37 +1,63 @@
-// src/hooks/useApi.ts
-import * as React from "react";
+import { useState, useEffect } from "react";
+import {
+  AutomationAction,
+  WorkflowDefinition,
+  SimulationResult,
+} from "@/types/workflow";
 
-export async function fetcher(url: string, opts?: RequestInit) {
-  const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(`API ${url} failed: ${res.status}`);
-  return res.json();
-}
+export const useApi = () => {
+  const [automations, setAutomations] = useState<AutomationAction[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-export function useAutomations() {
-  // lightweight client-side fetch (no swr required)
-  const [actions, setActions] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  React.useEffect(() => {
-    let mounted = true;
-    fetcher("/api/automations")
-      .then((d) => {
-        if (mounted) setActions(d);
-      })
-      .catch(() => setActions([]))
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
+  useEffect(() => {
+    fetchAutomations();
   }, []);
-  return { actions, loading };
-}
 
-export async function simulateWorkflow(payload: any) {
-  return fetcher("/api/simulate", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-}
+  const fetchAutomations = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/automations");
+      if (!response.ok) throw new Error("Failed to fetch automations");
+      const data = await response.json();
+      setAutomations(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const simulateWorkflow = async (
+    workflow: WorkflowDefinition
+  ): Promise<SimulationResult> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/simulate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(workflow),
+      });
+      if (!response.ok) throw new Error("Simulation failed");
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    automations,
+    loading,
+    error,
+    fetchAutomations,
+    simulateWorkflow,
+  };
+};

@@ -1,13 +1,49 @@
-// src/components/nodes/ApprovalNode.tsx
 import React from "react";
-export default function ApprovalNode({ data }: any) {
+import { Handle, Position } from "reactflow";
+
+interface ApprovalNodeProps {
+  data: {
+    label: string;
+    approverRole?: string;
+  };
+  selected: boolean;
+}
+
+export const ApprovalNode: React.FC<ApprovalNodeProps> = ({
+  data,
+  selected,
+}) => {
   return (
-    <div className="p-3 bg-white rounded shadow-sm border">
-      <div className="text-xs text-slate-500">Approval</div>
-      <div className="font-medium">{data?.title || "Approval"}</div>
-      <div className="text-xs text-slate-400">
-        {data?.approverRole || "Role: ..."}
+    <div
+      className={`px-4 py-3 rounded-lg border-2 ${
+        selected ? "border-blue-500 shadow-lg" : "border-orange-500"
+      } bg-orange-50 shadow-md min-w-[160px] transition-all`}
+    >
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="w-3 h-3 bg-orange-500"
+      />
+      <div className="flex items-center gap-2">
+        <span className="text-lg">✓</span>
+        <div>
+          <div className="font-semibold text-orange-700 text-xs uppercase">
+            Approval
+          </div>
+          <div className="text-sm text-gray-800 font-medium">{data.label}</div>
+          {data.approverRole && (
+            <div className="text-xs text-gray-600 mt-1 flex items-center gap-1">
+              <span>👔</span>
+              {data.approverRole}
+            </div>
+          )}
+        </div>
       </div>
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="w-3 h-3 bg-orange-500"
+      />
     </div>
   );
-}
+};

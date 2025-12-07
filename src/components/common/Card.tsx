@@ -1,13 +1,16 @@
-import React, { memo } from "react";
+import React from "react";
 
-export const Card = memo(({ 
-  children,
-  className=""
-}:{ 
+interface CardProps {
   children: React.ReactNode;
-  className?:string 
-}) => (
-  <div className={`bg-white border shadow-sm rounded-lg ${className}`}>
-    {children}
-  </div>
-));
+  className?: string;
+}
+
+export const Card: React.FC<CardProps> = ({ children, className = "" }) => {
+  return (
+    <div
+      className={`bg-white rounded-lg shadow-md border border-gray-200 ${className}`}
+    >
+      {children}
+    </div>
+  );
+};

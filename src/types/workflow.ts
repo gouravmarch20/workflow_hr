@@ -1,55 +1,84 @@
-// src/types/workflow.ts
-import { Node as RFNode, Edge as RFEdge } from "reactflow";
+import { Node, Edge } from "reactflow";
 
 export type NodeType = "start" | "task" | "approval" | "automated" | "end";
 
-export interface BaseData {
-  title?: string;
-  meta?: Record<string, string>;
+export interface MetadataItem {
+  key: string;
+  value: string;
 }
 
-export interface StartData extends BaseData {
-  title: string;
-  meta?: Record<string, string>;
+export interface StartNodeData {
+  label: string;
+  metadata?: MetadataItem[];
 }
 
-export interface TaskData extends BaseData {
-  title: string;
+export interface TaskNodeData {
+  label: string;
   description?: string;
   assignee?: string;
   dueDate?: string;
-  custom?: Record<string, string>;
+  customFields?: MetadataItem[];
 }
 
-export interface ApprovalData extends BaseData {
-  title: string;
+export interface ApprovalNodeData {
+  label: string;
   approverRole?: string;
   autoApproveThreshold?: number;
 }
 
-export interface AutomatedData extends BaseData {
-  title: string;
-  actionId?: string;
-  params?: Record<string, string>;
+export interface AutomatedNodeData {
+  label: string;
+  action?: string;
+  actionParams?: Record<string, string>;
 }
 
-export interface EndData extends BaseData {
-  message?: string;
-  summary?: boolean;
+export interface EndNodeData {
+  label: string;
+  endMessage?: string;
+  summaryFlag?: boolean;
 }
 
-export type NodeData =
-  | StartData
-  | TaskData
-  | ApprovalData
-  | AutomatedData
-  | EndData;
+export type WorkflowNodeData =
+  | StartNodeData
+  | TaskNodeData
+  | ApprovalNodeData
+  | AutomatedNodeData
+  | EndNodeData;
 
-export type WorkflowNode = RFNode<NodeData> & { type: NodeType };
-export type WorkflowEdge = RFEdge;
+export interface WorkflowNode extends Node {
+  type: NodeType;
+  data: WorkflowNodeData;
+}
+
+export interface WorkflowDefinition {
+  nodes: WorkflowNode[];
+  edges: Edge[];
+}
 
 export interface AutomationAction {
   id: string;
   label: string;
   params: string[];
+}
+
+export interface SimulationStep {
+  nodeId: string;
+  nodeType: NodeType;
+  nodeLabel: string;
+  status: "pending" | "completed" | "failed";
+  message: string;
+  timestamp: string;
+}
+
+export interface SimulationResult {
+  success: boolean;
+  steps: SimulationStep[];
+  errors?: string[];
+  duration?: number;
+}
+
+export interface ValidationError {
+  nodeId?: string;
+  message: string;
+  type: "error" | "warning";
 }

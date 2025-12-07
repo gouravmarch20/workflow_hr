@@ -1,52 +1,82 @@
-import React, { memo } from "react";
-import { X, Plus } from "lucide-react";
-import { Button } from "./Button";
+import React from "react";
+import { Plus, Trash2 } from "lucide-react";
 
-export const KeyValueList = memo(({
+interface KeyValueItem {
+  key: string;
+  value: string;
+}
+
+interface KeyValueListProps {
+  items: KeyValueItem[];
+  onChange: (items: KeyValueItem[]) => void;
+  label: string;
+}
+
+export const KeyValueList: React.FC<KeyValueListProps> = ({
   items,
   onChange,
-  label
-}:{
-  items: Array<{ key: string; value: string }>;
-  onChange:(items:Array<{key:string,value:string}>)=>void;
-  label:string;
+  label,
 }) => {
+  const addItem = () => {
+    onChange([...items, { key: "", value: "" }]);
+  };
 
-  const addItem = () => onChange([...items,{ key:"",value:""}]);
-  const updateItem = (i:number,f:"key"|"value",v:string)=>{
-    const arr=[...items]; arr[i]={...arr[i],[f]:v}; onChange(arr);
-  }
-  const removeItem = (i:number)=> onChange(items.filter((_,x)=>x!==i));
+  const updateItem = (index: number, field: "key" | "value", value: string) => {
+    const updated = [...items];
+    updated[index][field] = value;
+    onChange(updated);
+  };
 
-  return(
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
+  const removeItem = (index: number) => {
+    const updated = items.filter((_, i) => i !== index);
+    onChange(updated);
+  };
 
-      <ul className="space-y-2">
-        {items.map((item,i)=>(
-          <li key={i} className="flex items-center gap-2">
+  return (
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-2">
+        <label className="block text-sm font-medium text-gray-700">
+          {label}
+        </label>
+        <button
+          type="button"
+          onClick={addItem}
+          className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        >
+          <Plus size={14} />
+          Add
+        </button>
+      </div>
+      <div className="space-y-2">
+        {items.map((item, index) => (
+          <div key={index} className="flex gap-2">
             <input
+              type="text"
               value={item.key}
-              onChange={(e)=>updateItem(i,"key",e.target.value)}
-              className="flex-1 px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-indigo-500"
+              onChange={(e) => updateItem(index, "key", e.target.value)}
               placeholder="Key"
+              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <input
+              type="text"
               value={item.value}
-              onChange={(e)=>updateItem(i,"value",e.target.value)}
-              className="flex-1 px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-indigo-500"
+              onChange={(e) => updateItem(index, "value", e.target.value)}
               placeholder="Value"
+              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <button onClick={()=>removeItem(i)} className="p-1 text-red-600 hover:bg-red-50 rounded">
-              <X size={16}/>
+            <button
+              type="button"
+              onClick={() => removeItem(index)}
+              className="px-2 py-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+            >
+              <Trash2 size={16} />
             </button>
-          </li>
+          </div>
         ))}
-      </ul>
-
-      <Button variant="secondary" className="w-full text-sm" onClick={addItem}>
-        <Plus size={14}/> Add Field
-      </Button>
+        {items.length === 0 && (
+          <p className="text-xs text-gray-400 italic">No items added yet</p>
+        )}
+      </div>
     </div>
   );
-});
+};

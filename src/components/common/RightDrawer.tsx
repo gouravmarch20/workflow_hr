@@ -1,55 +1,56 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
+import { X } from "lucide-react";
 
-export default function RightDrawer({
-  open,
-  onClose,
-  children,
-  width = "350px",
-}: {
+interface RightDrawerProps {
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
   width?: string;
-}) {
-  // prevent scrolling when drawer open
+}
+
+export const RightDrawer: React.FC<RightDrawerProps> = ({
+  open,
+  onClose,
+  children,
+  width = "350px",
+}) => {
   useEffect(() => {
-    if (open) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "auto";
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [open]);
+
+  if (!open) return null;
 
   return (
     <>
-      {/* Overlay Background Blur */}
+      {/* Backdrop */}
       <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
         onClick={onClose}
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 
-        ${
-          open
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
       />
 
-      {/* Drawer Panel */}
+      {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full bg-white shadow-xl transition-transform duration-300 
-        ${open ? "translate-x-0" : "translate-x-full"}`}
+        className="fixed top-0 right-0 h-full bg-white shadow-xl z-50 overflow-y-auto"
         style={{ width }}
       >
-        <div className="p-4 border-b flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Drawer</h3>
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+          <h2 className="text-lg font-bold text-gray-800">Configuration</h2>
           <button
             onClick={onClose}
-            className="text-xl font-bold hover:text-red-500"
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
           >
-            ×
+            <X size={20} />
           </button>
         </div>
-
-        <div className="p-4 overflow-y-auto h-[calc(100vh-60px)]">
-          {children}
-        </div>
+        <div className="p-6">{children}</div>
       </div>
     </>
   );
-}
+};

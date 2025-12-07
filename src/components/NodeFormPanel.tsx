@@ -1,168 +1,226 @@
-// src/components/NodeFormPanel.tsx
-"use client";
+import React from "react";
+import { WorkflowNode, AutomationAction, MetadataItem } from "@/types/workflow";
+import { Input } from "./common/Input";
+import { TextArea } from "./common/TextArea";
+import { Select } from "./common/Select";
+import { Checkbox } from "./common/Checkbox";
+import { KeyValueList } from "./common/KeyValueList";
+import { Trash2 } from "lucide-react";
 
-import React, { useEffect, useMemo, useState } from "react";
-import type { Node } from "reactflow";
-import type { NodeData } from "@/types/workflow"; // NodeData type from the shared types file
-import { useAutomations, simulateWorkflow } from "@/hooks/useApi";
+interface NodeFormPanelProps {
+  selectedNode: WorkflowNode | null;
+  onUpdate: (nodeId: string, updates: Partial<any>) => void;
+  onDelete: (nodeId: string) => void;
+  automations: AutomationAction[];
+}
 
-type Props = {
-  nodeId: string | null;
-  nodes: Node<NodeData>[];
-  updateNode: (id: string, patch: Partial<NodeData>) => void;
-  close: () => void;
-  serialize: () => { nodes: Node<NodeData>[]; edges: any[] };
-};
-
-export default function NodeFormPanel({ nodeId, nodes, updateNode, close, serialize }: Props) {
-  const node = useMemo(() => nodes.find((n) => n.id === nodeId), [nodes, nodeId]);
-  const { actions, loading: actionsLoading } = useAutomations();
-
-  // local editable copy of node.data
-  const [local, setLocal] = useState<Partial<NodeData>>({});
-  const [simLogs, setSimLogs] = useState<any[] | null>(null);
-  const [running, setRunning] = useState(false);
-
-  useEffect(() => {
-    setLocal(node?.data ? { ...node.data } : {});
-  }, [node?.id]); // update when selection changes
-
-  // guard rendering if no node selected
-  if (!node) {
+export const NodeFormPanel: React.FC<NodeFormPanelProps> = ({
+  selectedNode,
+  onUpdate,
+  onDelete,
+  automations,
+}) => {
+  if (!selectedNode) {
     return (
-      <div className="w-80 p-4 border-l bg-white">
-        <div className="text-sm text-gray-600">Select a node to edit</div>
+      <div className="w-80 bg-white border-l border-gray-200 p-6 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-400 mb-2">No node selected</p>
+          <p className="text-xs text-gray-400">Click on a node to edit</p>
+        </div>
       </div>
     );
   }
 
-  // Save handler - always guard node presence
-  function onSave() {
-    if (!node) return;
-    updateNode(node.id, local as Partial<NodeData>);
-  }
+  const updateField = (field: string, value: any) => {
+    onUpdate(selectedNode.id, { [field]: value });
+  };
 
-  async function onSimulate() {
-    setRunning(true);
-    setSimLogs(null);
-    try {
-      const payload = serialize();
-      const res = await simulateWorkflow(payload);
-      setSimLogs(res.logs || []);
-    } catch (err: any) {
-      setSimLogs([{ error: err?.message || String(err) }]);
-    } finally {
-      setRunning(false);
-    }
-  }
+  const renderStartNodeForm = () => (
+    <>
+      <Input
+        label="Title"
+        value={selectedNode.data.label}
+        onChange={(v) => updateField("label", v)}
+        placeholder="e.g., New Employee Onboarding"
+        required
+      />
+      <KeyValueList
+        label="Metadata"
+        items={(selectedNode.data as any).metadata || []}
+        onChange={(items) => updateField("metadata", items)}
+      />
+    </>
+  );
 
-  // Helper to update local state
-  const setField = (k: keyof NodeData, v: any) => setLocal((s) => ({ ...(s || {}), [k]: v }));
+  const renderTaskNodeForm = () => (
+    <>
+      <Input
+        label="Title"
+        value={selectedNode.data.label}
+        onChange={(v) => updateField("label", v)}
+        placeholder="e.g., Collect Documents"
+        required
+      />
+      <TextArea
+        label="Description"
+        value={(selectedNode.data as any).description || ""}
+        onChange={(v) => updateField("description", v)}
+        placeholder="Describe the task..."
+        rows={3}
+      />
+      <Input
+        label="Assignee"
+        value={(selectedNode.data as any).assignee || ""}
+        onChange={(v) => updateField("assignee", v)}
+        placeholder="e.g., HR Manager"
+      />
+      <Input
+        label="Due Date"
+        value={(selectedNode.data as any).dueDate || ""}
+        onChange={(v) => updateField("dueDate", v)}
+        type="date"
+      />
+      <KeyValueList
+        label="Custom Fields"
+        items={(selectedNode.data as any).customFields || []}
+        onChange={(items) => updateField("customFields", items)}
+      />
+    </>
+  );
 
-  return (
-    <div className="w-80 p-4 border-l bg-white h-full overflow-auto">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <div className="text-xs text-gray-500">Editing</div>
-          <div className="font-semibold">{node.data?.title ?? node.id}</div>
-          <div className="text-xs text-gray-400">{node.type}</div>
-        </div>
-        <button onClick={close} className="text-sm text-gray-500">Close</button>
-      </div>
+  const renderApprovalNodeForm = () => (
+    <>
+      <Input
+        label="Title"
+        value={selectedNode.data.label}
+        onChange={(v) => updateField("label", v)}
+        placeholder="e.g., Manager Approval"
+        required
+      />
+      <Select
+        label="Approver Role"
+        value={(selectedNode.data as any).approverRole || ""}
+        onChange={(v) => updateField("approverRole", v)}
+        options={[
+          { value: "Manager", label: "Manager" },
+          { value: "HRBP", label: "HR Business Partner" },
+          { value: "Director", label: "Director" },
+          { value: "VP", label: "Vice President" },
+          { value: "CEO", label: "CEO" },
+        ]}
+      />
+      <Input
+        label="Auto-Approve Threshold"
+        value={String((selectedNode.data as any).autoApproveThreshold || "")}
+        onChange={(v) => updateField("autoApproveThreshold", Number(v))}
+        type="number"
+        placeholder="e.g., 1000"
+      />
+    </>
+  );
 
-      {/* Forms by node.type */}
-      {node.type === "start" && (
-        <>
-          <label className="block text-xs text-gray-600">Title</label>
-          <input className="w-full mb-2 p-2 border rounded" value={local.title ?? ""} onChange={(e) => setField("title", e.target.value)} />
-          <label className="block text-xs text-gray-600">Metadata (json)</label>
-          <textarea className="w-full mb-2 p-2 border rounded" value={JSON.stringify(local.meta ?? {}, null, 2)} onChange={(e) => {
-            try {
-              setField("meta", JSON.parse(e.target.value));
-            } catch {
-              // ignore parse errors in UI; user can fix
-            }
-          }} />
-        </>
-      )}
+  const renderAutomatedNodeForm = () => {
+    const selectedAction = automations.find(
+      (a) => a.id === (selectedNode.data as any).action
+    );
 
-      {node.type === "task" && (
-        <>
-          <label className="block text-xs text-gray-600">Title *</label>
-          <input className="w-full mb-2 p-2 border rounded" value={local.title ?? ""} onChange={(e) => setField("title", e.target.value)} />
-          <label className="block text-xs text-gray-600">Description</label>
-          <textarea className="w-full mb-2 p-2 border rounded" value={(local as any).description ?? ""} onChange={(e) => setField("description" as any, e.target.value)} />
-          <label className="block text-xs text-gray-600">Assignee</label>
-          <input className="w-full mb-2 p-2 border rounded" value={(local as any).assignee ?? ""} onChange={(e) => setField("assignee" as any, e.target.value)} />
-          <label className="block text-xs text-gray-600">Due date</label>
-          <input type="date" className="w-full mb-2 p-2 border rounded" value={(local as any).dueDate ?? ""} onChange={(e) => setField("dueDate" as any, e.target.value)} />
-        </>
-      )}
-
-      {node.type === "approval" && (
-        <>
-          <label className="block text-xs text-gray-600">Title</label>
-          <input className="w-full mb-2 p-2 border rounded" value={local.title ?? ""} onChange={(e) => setField("title", e.target.value)} />
-          <label className="block text-xs text-gray-600">Approver role</label>
-          <input className="w-full mb-2 p-2 border rounded" value={(local as any).approverRole ?? ""} onChange={(e) => setField("approverRole" as any, e.target.value)} />
-          <label className="block text-xs text-gray-600">Auto-approve threshold</label>
-          <input type="number" className="w-full mb-2 p-2 border rounded" value={(local as any).autoApproveThreshold ?? 0} onChange={(e) => setField("autoApproveThreshold" as any, Number(e.target.value))} />
-        </>
-      )}
-
-      {node.type === "automated" && (
-        <>
-          <label className="block text-xs text-gray-600">Title</label>
-          <input className="w-full mb-2 p-2 border rounded" value={local.title ?? ""} onChange={(e) => setField("title", e.target.value)} />
-
-          <label className="block text-xs text-gray-600">Action</label>
-          <select className="w-full mb-2 p-2 border rounded" value={(local as any).actionId ?? ""} onChange={(e) => setField("actionId" as any, e.target.value)}>
-            <option value="">-- select action --</option>
-            {actionsLoading ? <option>Loading…</option> : actions.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
-          </select>
-
-          {/* render action params dynamically */}
-          {actions?.find((a) => a.id === (local as any).actionId)?.params?.map((p: string) => (
-            <div key={p}>
-              <label className="block text-xs text-gray-600">{p}</label>
-              <input className="w-full mb-2 p-2 border rounded" value={(local as any).params?.[p] ?? ""} onChange={(e) => {
-                setField("params" as any, { ...((local as any).params || {}), [p]: e.target.value });
-              }} />
-            </div>
-          ))}
-        </>
-      )}
-
-      {node.type === "end" && (
-        <>
-          <label className="block text-xs text-gray-600">End message</label>
-          <input className="w-full mb-2 p-2 border rounded" value={(local as any).message ?? ""} onChange={(e) => setField("message" as any, e.target.value)} />
-          <label className="flex items-center gap-2 text-xs text-gray-600">
-            <input type="checkbox" checked={!!(local as any).summary} onChange={(e) => setField("summary" as any, e.target.checked)} />
-            Summary flag
-          </label>
-        </>
-      )}
-
-      <div className="mt-4 flex gap-2">
-        <button onClick={onSave} className="px-3 py-1 bg-blue-600 text-white rounded">Save</button>
-        <button onClick={onSimulate} className="px-3 py-1 bg-emerald-600 text-white rounded" disabled={running}>{running ? "Running…" : "Simulate"}</button>
-      </div>
-
-      {/* Simulation logs */}
-      <div className="mt-4">
-        <div className="text-xs text-gray-500 mb-2">Simulation</div>
-        {simLogs === null ? (<div className="text-sm text-gray-400">No runs yet</div>) : simLogs.length === 0 ? (<div className="text-sm text-gray-500">No logs</div>) : (
-          <div className="space-y-2">
-            {simLogs.map((l, idx) => (
-              <div key={idx} className="p-2 bg-slate-50 rounded border text-sm">
-                <div className="font-medium">{l.type ?? l.nodeId ?? "step"}</div>
-                <div className="text-xs text-gray-600">{l.message ?? JSON.stringify(l)}</div>
-              </div>
+    return (
+      <>
+        <Input
+          label="Title"
+          value={selectedNode.data.label}
+          onChange={(v) => updateField("label", v)}
+          placeholder="e.g., Send Welcome Email"
+          required
+        />
+        <Select
+          label="Action"
+          value={(selectedNode.data as any).action || ""}
+          onChange={(v) => {
+            updateField("action", v);
+            updateField("actionParams", {});
+          }}
+          options={automations.map((a) => ({ value: a.id, label: a.label }))}
+          required
+        />
+        {selectedAction && selectedAction.params.length > 0 && (
+          <div className="space-y-3 p-3 bg-gray-50 rounded-lg">
+            <p className="text-sm font-medium text-gray-700">
+              Action Parameters
+            </p>
+            {selectedAction.params.map((param) => (
+              <Input
+                key={param}
+                label={param.charAt(0).toUpperCase() + param.slice(1)}
+                value={
+                  ((selectedNode.data as any).actionParams || {})[param] || ""
+                }
+                onChange={(v) => {
+                  const params = {
+                    ...((selectedNode.data as any).actionParams || {}),
+                  };
+                  params[param] = v;
+                  updateField("actionParams", params);
+                }}
+                placeholder={`Enter ${param}`}
+              />
             ))}
           </div>
         )}
+      </>
+    );
+  };
+
+  const renderEndNodeForm = () => (
+    <>
+      <Input
+        label="Title"
+        value={selectedNode.data.label}
+        onChange={(v) => updateField("label", v)}
+        placeholder="e.g., Onboarding Complete"
+        required
+      />
+      <TextArea
+        label="End Message"
+        value={(selectedNode.data as any).endMessage || ""}
+        onChange={(v) => updateField("endMessage", v)}
+        placeholder="Message to display when workflow completes"
+        rows={2}
+      />
+      <Checkbox
+        label="Generate Summary"
+        checked={(selectedNode.data as any).summaryFlag || false}
+        onChange={(v) => updateField("summaryFlag", v)}
+      />
+    </>
+  );
+
+  return (
+    <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
+      <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+        <h3 className="font-bold text-lg text-gray-800">Edit Node</h3>
+        <button
+          onClick={() => onDelete(selectedNode.id)}
+          className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors"
+          title="Delete Node"
+        >
+          <Trash2 size={18} />
+        </button>
+      </div>
+
+      <div className="p-6 space-y-4">
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-xs text-blue-800 font-medium">
+            {selectedNode.type.toUpperCase()} NODE
+          </p>
+        </div>
+
+        {selectedNode.type === "start" && renderStartNodeForm()}
+        {selectedNode.type === "task" && renderTaskNodeForm()}
+        {selectedNode.type === "approval" && renderApprovalNodeForm()}
+        {selectedNode.type === "automated" && renderAutomatedNodeForm()}
+        {selectedNode.type === "end" && renderEndNodeForm()}
       </div>
     </div>
   );
-}
+};

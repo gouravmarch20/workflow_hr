@@ -1,22 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2020",
     "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
     ],
+    "jsx": "preserve",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
     "allowJs": true,
-    "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "types": ["react", "react-dom"],
-    "jsx": "preserve",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "plugins": [
       {
@@ -27,17 +26,15 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "isolatedModules": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src/components_pgW/stopwatch/StopWatch.jsx",
-    "src/app/2_pattern/configDrivenUi/navData.js",
-    "src/app/oauth/page.tsx"
-, "src/components_pgW/4_redux_toolkit/app/_app.js.js", "src/components_pgW/4_redux_toolkit/utils/logger.js", "src/components_pgW/4_redux_toolkit/features/products/productsSlice.js", "src/app/4_redux_toolkit/page.jsx"  ],
+    ".next/types/**/*.ts"
+  ],
   "exclude": [
     "node_modules"
   ]
