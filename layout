@@ -1,0 +1,29 @@
+/src
+  /app
+    /page.tsx                <-- main entry (renders <Designer />)
+  /components
+    Canvas.tsx
+    SidebarPalette.tsx
+    NodeFormPanel.tsx
+    SimulatorPanel.tsx
+    /nodes
+      StartNode.tsx
+      TaskNode.tsx
+      ApprovalNode.tsx
+      AutomatedNode.tsx
+      EndNode.tsx
+  /hooks
+    useWorkflow.ts
+    useApi.ts
+  /lib
+    simulateEngine.ts
+  /types
+    workflow.ts
+  /styles
+    globals.css
+/src/app/api
+  /automations/route.ts
+  /simulate/route.ts
+package.json
+tailwind.config.js
+tsconfig.json
