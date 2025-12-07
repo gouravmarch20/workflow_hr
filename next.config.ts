@@ -1,12 +1,10 @@
-// next.config.ts
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  fontLoaders: [], // 👈 prevents automatic Geist/Inter injection
+const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // ✅ must be inside eslint
+    ignoreDuringBuilds: true,
   },
-  /* other config options */
-};
+  reactStrictMode: true,
+} as unknown as NextConfig;
 
 export default nextConfig;
