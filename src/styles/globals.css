@@ -1,38 +1,33 @@
 @import "tailwindcss";
+@source "./src";
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+/* You can keep reset BUT it must NOT override utilities */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    padding: 0;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+      "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+      "Helvetica Neue", sans-serif;
+    overflow-x: hidden;
+  }
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* React Flow customizations */
+/* Custom styles */
 .react-flow__node {
   cursor: pointer;
 }
-
 .react-flow__node.selected {
   box-shadow: 0 0 0 2px #3b82f6;
 }
-
 .react-flow__edge-path {
   stroke-width: 2;
 }
-
 .react-flow__edge.selected .react-flow__edge-path {
   stroke: #3b82f6;
 }

@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Workflow Builder & Simulator
 
-## Getting Started
+A **visual workflow automation builder** built using **React, Next.js, TypeScript & React Flow**.  
+Create workflows using drag-and-drop nodes, configure steps, simulate execution & export/import JSON.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Visual Canvas** – Drag & drop workflow creation using React Flow
+- **5 Node Types** – Start, Task, Approval, Automated, End
+- **Dynamic Forms** – Auto-render inputs based on node type with validation
+- **Workflow Simulation** – Step-by-step workflow execution UI
+- **Import/Export JSON** – Save workflows & load anytime
+- **Mock API Integrated** – Automation + simulation endpoints
+- **Type Safe** – Fully written in TypeScript
+- **Clean & Scalable Architecture**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Architecture Highlights
 
-## Learn More
+- Separation of UI, logic & workflow engine
+- Reusable component system under `/common`
+- Custom hooks for workflow + API control
+- TypeScript interfaces for strict data contracts
+- Scalable node architecture (easy to add new nodes)
+- Consistent & maintainable file structure
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Folder Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+root/
+├── package.json
+├── tailwind.config.js
+├── tsconfig.json
+└── src/
+├── app/
+│ ├── page.tsx # Main UI entry screen
+│ └── api/
+│ ├── automations/route.ts # API route for automation operations
+│ └── simulate/route.ts # API route for workflow simulation
+│
+├── components/ # Reusable UI components
+│ ├── Canvas.tsx # Main workflow canvas area
+│ ├── SidebarPalette.tsx # Node palette on left side
+│ ├── NodeFormPanel.tsx # Right panel dynamic form for nodes
+│ └── SimulatorPanel.tsx # Workflow execution simulator UI
+│
+├── nodes/ # Node components for workflow builder
+│ ├── StartNode.tsx
+│ ├── TaskNode.tsx
+│ ├── ApprovalNode.tsx
+│ ├── AutomatedNode.tsx
+│ └── EndNode.tsx
+│
+├── common/ # Shared small UI elements
+│ ├── Input.tsx # { label,value,onChange,placeholder,required?,type }
+│ ├── KeyValueList.tsx # { items,onChange,label }
+│ ├── Card.tsx # { children,className }
+│ ├── Checkbox.tsx # { label,checked,onChange }
+│ ├── RightDrawer.tsx # { open,onClose,children,width?="350px" }
+│ ├── Select.tsx # { label,value,onChange,options,required? }
+│ └── TextArea.tsx # { label,value,onChange,placeholder,rows }
+│
+├── hooks/
+│ ├── useWorkflow.ts # Handles workflow builder state logic
+│ └── useApi.ts # Generic API helper hook
+│
+├── lib/
+│ └── simulateEngine.ts # Core workflow simulation logic
+│
+├── types/
+│ └── workflow.ts # TypeScript models/interfaces
+│
+└── styles/
+└── globals.css

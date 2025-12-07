@@ -9,7 +9,7 @@ import { NodeFormPanel } from "@/components/NodeFormPanel";
 import { SimulatorPanel } from "@/components/SimulatorPanel";
 import { useWorkflow } from "@/hooks/useWorkflow";
 import { useApi } from "@/hooks/useApi";
-import "@/styles/globals.css";
+
 
 export default function HomePage() {
   const {

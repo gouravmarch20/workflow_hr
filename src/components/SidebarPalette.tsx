@@ -68,7 +68,7 @@ export const SidebarPalette: React.FC = () => {
         {nodeTemplates.map((node) => (
           <Card key={node.type} className="p-0 overflow-hidden">
             <div
-              className={`${node.color} border-2 p-3 cursor-move transition-all`}
+              className={` border-2 p-3 cursor-move transition-all  `}
               draggable
               onDragStart={(e) => onDragStart(e, node.type, node.label)}
             >
