@@ -1,5 +1,7 @@
-import React from "react";
-import { WorkflowNode, AutomationAction, MetadataItem } from "@/types/workflow";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { WorkflowNode, AutomationAction } from "@/types/workflow";
 import { Input } from "./common/Input";
 import { TextArea } from "./common/TextArea";
 import { Select } from "./common/Select";
@@ -20,149 +22,135 @@ export const NodeFormPanel: React.FC<NodeFormPanelProps> = ({
   onDelete,
   automations,
 }) => {
+  // Local form data instead of live update
+  const [form, setForm] = useState<any>({});
+
+  useEffect(() => {
+    if (selectedNode) setForm(selectedNode.data);
+  }, [selectedNode]);
+
   if (!selectedNode) {
     return (
       <div className="w-80 bg-white border-l border-gray-200 p-6 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-400 mb-2">No node selected</p>
-          <p className="text-xs text-gray-400">Click on a node to edit</p>
-        </div>
+        <p className="text-gray-400">No node selected</p>
       </div>
     );
   }
 
   const updateField = (field: string, value: any) => {
-    onUpdate(selectedNode.id, { [field]: value });
+    setForm((prev: any) => ({ ...prev, [field]: value })); // local update only
   };
 
-  const renderStartNodeForm = () => (
+  const handleSave = () => onUpdate(selectedNode.id, form);
+  const handleCancel = () => setForm(selectedNode.data);
+
+  // ------- Render Forms Per Node Type --------
+  const StartForm = () => (
     <>
       <Input
         label="Title"
-        value={selectedNode.data.label}
-        onChange={(v) => updateField("label", v)}
-        placeholder="e.g., New Employee Onboarding"
+        value={form.label}
         required
+        onChange={(v) => updateField("label", v)}
       />
       <KeyValueList
         label="Metadata"
-        items={(selectedNode.data as any).metadata || []}
+        items={form.metadata || []}
         onChange={(items) => updateField("metadata", items)}
       />
     </>
   );
 
-  const renderTaskNodeForm = () => (
+  const TaskForm = () => (
     <>
       <Input
         label="Title"
-        value={selectedNode.data.label}
-        onChange={(v) => updateField("label", v)}
-        placeholder="e.g., Collect Documents"
+        value={form.label}
         required
+        onChange={(v) => updateField("label", v)}
       />
       <TextArea
         label="Description"
-        value={(selectedNode.data as any).description || ""}
-        onChange={(v) => updateField("description", v)}
-        placeholder="Describe the task..."
         rows={3}
+        value={form.description || ""}
+        onChange={(v) => updateField("description", v)}
       />
       <Input
         label="Assignee"
-        value={(selectedNode.data as any).assignee || ""}
+        value={form.assignee || ""}
         onChange={(v) => updateField("assignee", v)}
-        placeholder="e.g., HR Manager"
       />
       <Input
-        label="Due Date"
-        value={(selectedNode.data as any).dueDate || ""}
-        onChange={(v) => updateField("dueDate", v)}
         type="date"
+        label="Due Date"
+        value={form.dueDate || ""}
+        onChange={(v) => updateField("dueDate", v)}
       />
       <KeyValueList
         label="Custom Fields"
-        items={(selectedNode.data as any).customFields || []}
+        items={form.customFields || []}
         onChange={(items) => updateField("customFields", items)}
       />
     </>
   );
 
-  const renderApprovalNodeForm = () => (
+  const ApprovalForm = () => (
     <>
       <Input
         label="Title"
-        value={selectedNode.data.label}
+        value={form.label}
         onChange={(v) => updateField("label", v)}
-        placeholder="e.g., Manager Approval"
-        required
       />
       <Select
         label="Approver Role"
-        value={(selectedNode.data as any).approverRole || ""}
+        value={form.approverRole || ""}
+        options={["Manager", "HRBP", "Director", "VP", "CEO"].map((r) => ({
+          label: r,
+          value: r,
+        }))}
         onChange={(v) => updateField("approverRole", v)}
-        options={[
-          { value: "Manager", label: "Manager" },
-          { value: "HRBP", label: "HR Business Partner" },
-          { value: "Director", label: "Director" },
-          { value: "VP", label: "Vice President" },
-          { value: "CEO", label: "CEO" },
-        ]}
       />
       <Input
-        label="Auto-Approve Threshold"
-        value={String((selectedNode.data as any).autoApproveThreshold || "")}
-        onChange={(v) => updateField("autoApproveThreshold", Number(v))}
+        label="Auto Approve Threshold"
         type="number"
-        placeholder="e.g., 1000"
+        value={form.autoApproveThreshold || ""}
+        onChange={(v) => updateField("autoApproveThreshold", Number(v))}
       />
     </>
   );
 
-  const renderAutomatedNodeForm = () => {
-    const selectedAction = automations.find(
-      (a) => a.id === (selectedNode.data as any).action
-    );
+  const AutomatedForm = () => {
+    const action = automations.find((a) => a.id === form.action);
 
     return (
       <>
         <Input
           label="Title"
-          value={selectedNode.data.label}
+          value={form.label}
           onChange={(v) => updateField("label", v)}
-          placeholder="e.g., Send Welcome Email"
-          required
         />
+
         <Select
           label="Action"
-          value={(selectedNode.data as any).action || ""}
-          onChange={(v) => {
-            updateField("action", v);
-            updateField("actionParams", {});
-          }}
+          value={form.action || ""}
           options={automations.map((a) => ({ value: a.id, label: a.label }))}
-          required
+          onChange={(v) => updateField("action", v)}
         />
-        {selectedAction && selectedAction.params.length > 0 && (
-          <div className="space-y-3 p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm font-medium text-gray-700">
-              Action Parameters
-            </p>
-            {selectedAction.params.map((param) => (
+
+        {action && action.params.length > 0 && (
+          <div className="bg-gray-50 p-3 rounded-lg space-y-3">
+            <p className="text-sm font-semibold text-gray-700">Action Params</p>
+            {action.params.map((param) => (
               <Input
                 key={param}
-                label={param.charAt(0).toUpperCase() + param.slice(1)}
-                value={
-                  ((selectedNode.data as any).actionParams || {})[param] || ""
+                label={param}
+                value={form.actionParams?.[param] || ""}
+                onChange={(v) =>
+                  updateField("actionParams", {
+                    ...form.actionParams,
+                    [param]: v,
+                  })
                 }
-                onChange={(v) => {
-                  const params = {
-                    ...((selectedNode.data as any).actionParams || {}),
-                  };
-                  params[param] = v;
-                  updateField("actionParams", params);
-                }}
-                placeholder={`Enter ${param}`}
               />
             ))}
           </div>
@@ -171,55 +159,63 @@ export const NodeFormPanel: React.FC<NodeFormPanelProps> = ({
     );
   };
 
-  const renderEndNodeForm = () => (
+  const EndForm = () => (
     <>
       <Input
         label="Title"
-        value={selectedNode.data.label}
+        value={form.label}
         onChange={(v) => updateField("label", v)}
-        placeholder="e.g., Onboarding Complete"
-        required
       />
       <TextArea
         label="End Message"
-        value={(selectedNode.data as any).endMessage || ""}
-        onChange={(v) => updateField("endMessage", v)}
-        placeholder="Message to display when workflow completes"
         rows={2}
+        value={form.endMessage || ""}
+        onChange={(v) => updateField("endMessage", v)}
       />
       <Checkbox
         label="Generate Summary"
-        checked={(selectedNode.data as any).summaryFlag || false}
+        checked={form.summaryFlag || false}
         onChange={(v) => updateField("summaryFlag", v)}
       />
     </>
   );
 
   return (
-    <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-        <h3 className="font-bold text-lg text-gray-800">Edit Node</h3>
+    <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+      {/* Header */}
+      <div className="p-4 border-b flex justify-between items-center">
+        <h3 className="font-semibold text-lg">Edit Node</h3>
         <button
           onClick={() => onDelete(selectedNode.id)}
-          className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors"
-          title="Delete Node"
+          className="text-red-500 hover:bg-red-50 p-2 rounded"
         >
           <Trash2 size={18} />
         </button>
       </div>
 
-      <div className="p-6 space-y-4">
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-xs text-blue-800 font-medium">
-            {selectedNode.type.toUpperCase()} NODE
-          </p>
-        </div>
+      {/* Form */}
+      <div className="flex-1 p-5 space-y-4 overflow-y-auto">
+        {selectedNode.type === "start" && <StartForm />}
+        {selectedNode.type === "task" && <TaskForm />}
+        {selectedNode.type === "approval" && <ApprovalForm />}
+        {selectedNode.type === "automated" && <AutomatedForm />}
+        {selectedNode.type === "end" && <EndForm />}
+      </div>
 
-        {selectedNode.type === "start" && renderStartNodeForm()}
-        {selectedNode.type === "task" && renderTaskNodeForm()}
-        {selectedNode.type === "approval" && renderApprovalNodeForm()}
-        {selectedNode.type === "automated" && renderAutomatedNodeForm()}
-        {selectedNode.type === "end" && renderEndNodeForm()}
+      {/* Save / Cancel Buttons */}
+      <div className="p-4 border-t flex gap-2 bg-gray-50">
+        <button
+          onClick={handleCancel}
+          className="flex-1 border rounded py-2 hover:bg-gray-200"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSave}
+          className="flex-1 bg-blue-600 text-white rounded py-2 hover:bg-blue-700"
+        >
+          Save
+        </button>
       </div>
     </div>
   );

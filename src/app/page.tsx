@@ -10,7 +10,6 @@ import { SimulatorPanel } from "@/components/SimulatorPanel";
 import { useWorkflow } from "@/hooks/useWorkflow";
 import { useApi } from "@/hooks/useApi";
 
-
 export default function HomePage() {
   const {
     nodes,
@@ -42,8 +41,10 @@ export default function HomePage() {
       const { nodeType } = JSON.parse(data);
       const reactFlowBounds = event.currentTarget.getBoundingClientRect();
       const position = {
-        x: event.clientX - reactFlowBounds.left - 100,
-        y: event.clientY - reactFlowBounds.top - 50,
+        // x: event.clientX - reactFlowBounds.left - 100,
+        // y: event.clientY - reactFlowBounds.top - 50,
+        x: 0,
+        y: 0,
       };
 
       addNode(nodeType, position);
@@ -168,12 +169,14 @@ export default function HomePage() {
             onDrop={onDrop}
             onDragOver={onDragOver}
           />
-          <NodeFormPanel
-            selectedNode={selectedNode}
-            onUpdate={updateNode}
-            onDelete={deleteNode}
-            automations={automations}
-          />
+          {selectedNode && (
+            <NodeFormPanel
+              selectedNode={selectedNode}
+              onUpdate={updateNode}
+              onDelete={deleteNode}
+              automations={automations}
+            />
+          )}
         </div>
 
         {/* Simulator Panel */}

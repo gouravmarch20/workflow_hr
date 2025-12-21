@@ -21,7 +21,7 @@ export const ApprovalNode: React.FC<ApprovalNodeProps> = ({
     >
       <Handle
         type="target"
-        position={Position.Top}
+        position={Position.Left}
         className="w-3 h-3 bg-orange-500"
       />
       <div className="flex items-center gap-2">
@@ -39,11 +39,14 @@ export const ApprovalNode: React.FC<ApprovalNodeProps> = ({
           )}
         </div>
       </div>
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className="w-3 h-3 bg-orange-500"
-      />
+      {/* <div className="relative "> */}
+        <Handle
+          type="source"
+          position={Position.Right}
+          className="w-3 h-3 bg-orange-500"
+        />
+        {/* <button className="absolute right-4">dddfsaadfs</button> */}
+      {/* </div> */}
     </div>
   );
 };

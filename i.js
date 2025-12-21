@@ -1,0 +1,1 @@
+{"final":"Hello! How can I assist you today?","type":"final","score":1,"agent":{"icon":"","name":"Map Dashboard Conversational Agent","graphVersion":"v_2","deployment_id":"69368c9c8b6633f53d9c1e3e"},"fields":{"today":"11/12/2025"},"sessionId":"693a9dbc25a4a6e1ac1aa587","is_bot_reply":1}	

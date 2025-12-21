@@ -47,7 +47,6 @@ export class WorkflowSimulator {
     steps: SimulationStep[],
     visited: Set<string>
   ): Promise<void> {
-    // Prevent infinite loops
     if (visited.has(node.id)) {
       throw new Error(`Cycle detected at node: ${node.data.label}`);
     }
@@ -85,7 +84,6 @@ export class WorkflowSimulator {
       throw new Error(`Node "${node.data.label}" has no outgoing connections`);
     }
 
-    // Execute next nodes
     for (const edge of outgoingEdges) {
       const nextNode = this.workflow.nodes.find((n) => n.id === edge.target);
       if (nextNode) {
